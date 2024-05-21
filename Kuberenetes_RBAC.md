@@ -59,6 +59,79 @@ Define a ClusterRole that grants the required permissions. For admin privileges,
 Create a ClusterRoleBinding to bind the admin role to the new user:
 
 ```kubectl create clusterrolebinding newuser-admin-binding --clusterrole=admin --user=newuser```
+or
+```
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: custom-admin-role
+rules:
+- apiGroups: [""]
+  resources: ["*"]
+  verbs: ["*"]
+- apiGroups: ["apps", "extensions"]
+  resources: ["*"]
+  verbs: ["*"]
+- apiGroups: ["batch"]
+  resources: ["*"]
+  verbs: ["*"]
+- apiGroups: ["autoscaling"]
+  resources: ["*"]
+  verbs: ["*"]
+- apiGroups: ["policy"]
+  resources: ["*"]
+  verbs: ["*"]
+- apiGroups: ["rbac.authorization.k8s.io"]
+  resources: ["*"]
+  verbs: ["*"]
+- apiGroups: ["events.k8s.io"]
+  resources: ["*"]
+  verbs: ["*"]
+- apiGroups: ["networking.k8s.io"]
+  resources: ["*"]
+  verbs: ["*"]
+- apiGroups: ["storage.k8s.io"]
+  resources: ["*"]
+  verbs: ["*"] 
+```
+ClusterRoleBinding
+This YAML configuration creates a ClusterRoleBinding to bind the custom ClusterRole to the user newuser.
+
+```
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: newuser-admin-binding
+subjects:
+- kind: User
+  name: newuser
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: custom-admin-role
+  apiGroup: rbac.authorization.k8s.io
+```
+If you prefer to use the predefined admin ClusterRole provided by Kubernetes, you only need to create the ClusterRoleBinding:
+
+```
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: newuser-admin-binding
+subjects:
+- kind: User
+  name: newuser
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: admin
+  apiGroup: rbac.authorization.k8s.io
+```
+
+```kubectl apply -f custom-admin-role.yaml```
+```kubectl apply -f newuser-admin-binding.yaml```
+
+This process ensures that the new user newuser has admin privileges on the Kubernetes cluster, with permissions managed securely via RBAC and custom or predefined roles.
 
 Step 5: Create a Kubeconfig File for the New User
 Generate a kubeconfig file with the new user's credentials:
