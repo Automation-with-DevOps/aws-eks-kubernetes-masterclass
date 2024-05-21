@@ -21,7 +21,9 @@ Switch to the new user:
 Download and install kubectl:
 
 ```curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"```
+
 ```chmod +x kubectl```
+
 ```sudo mv kubectl /usr/local/bin/```
 
 Verify the installation:
@@ -29,6 +31,7 @@ Verify the installation:
 ```kubectl version --client```
 
 Step 3: Create Certificates for the New User
+
 Switch to the Kubernetes admin user or a user with admin privileges.
 Create a private key for the new user:
 
@@ -45,10 +48,13 @@ Sign the CSR with the Kubernetes CA (assuming you have access to ca.crt and ca.k
 Move the signed certificate and private key to the new user's .kube directory:
 
 ```sudo mkdir -p /home/newuser/.kube```
+
 ```sudo mv newuser.crt newuser.key /home/newuser/.kube/```
+
 ```sudo chown -R newuser:newuser /home/newuser/.kube```
 
 Step 4: Create a Kubernetes Role and RoleBinding for the New User
+
 Define a ClusterRole that grants the required permissions. For admin privileges, you can use the predefined admin role.
 Create a ClusterRoleBinding to bind the admin role to the new user:
 
@@ -58,18 +64,23 @@ Step 5: Create a Kubeconfig File for the New User
 Generate a kubeconfig file with the new user's credentials:
 
 ```kubectl config set-cluster kubernetes --certificate-authority=/etc/kubernetes/pki/ca.crt --server=https://your-kubernetes-api-server:6443 --kubeconfig=/home/newuser/.kube/config```
+
 ```kubectl config set-credentials newuser --client-certificate=/home/newuser/.kube/newuser.crt --client-key=/home/newuser/.kube/newuser.key --kubeconfig=/home/newuser/.kube/config```
+
 ```kubectl config set-context newuser-context --cluster=kubernetes --user=newuser --kubeconfig=/home/newuser/.kube/config```
+
 ```kubectl config use-context newuser-context --kubeconfig=/home/newuser/.kube/config```
 Ensure the new user has the correct permissions for the kubeconfig file:
 
 ```sudo chown newuser:newuser /home/newuser/.kube/config```
+
 ```sudo chmod 600 /home/newuser/.kube/config```
 
 Step 6: Verify the Access
 Switch to the new user and test access:
 
 ```su - newuser```
+
 ```kubectl get pods --all-namespaces```
 
 This command should list all pods in the cluster if the new user has admin privileges.
